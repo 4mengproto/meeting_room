@@ -2,1255 +2,1345 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FORM ENG 법인차량 예약 시스템</title>
-    <!-- 추가됨: Excel 파일 생성을 위한 SheetJS 라이브러리 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>포엠이엔지 회의실 예약 시스템</title>
     <style>
         :root {
-            --primary-color: #0056b3;
-            --background-color: #f4f7f6;
-            --text-color: #333;
-            --error-color: #dc3545;
-            --car1-color: #007bff;
-            --car2-color: #28a745;
-            --car3-color: #17a2b8;
-            --car4-color: #fd7e14;
-            --download-color: #198754;
-            --edit-color: #ffc107;
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f9fafb;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #4b5563;
+            --border-color: #e5e7eb;
         }
-        body {
-            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
+
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
         .container {
-            max-width: 950px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 30px;
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header-container {
+            position: relative; 
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+            width: 100%;
+            margin-bottom: 5px;
+            min-height: 40px; 
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #111827;
+            text-align: center;
+            margin: 0;
+        }
+
+        .home-btn {
+            position: absolute;
+            left: 0;
+            background-color: #6b7280;
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            white-space: nowrap;
+        }
+
+        .home-btn:hover {
+            background-color: #4b5563;
+        }
+
+        .vehicle-link-btn {
+            position: absolute; 
+            right: 0;
+            background-color: #10b981;
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            white-space: nowrap;
+        }
+
+        .vehicle-link-btn:hover {
+            background-color: #059669;
+        }
+
+        .room-toggle {
+            display: flex;
+            background-color: #e5e7eb;
+            padding: 4px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            gap: 4px;
+            margin-bottom: 15px;
+        }
+
+        .room-btn {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: 10px 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .room-btn.active {
+            background-color: var(--card-bg);
+            color: var(--primary-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .nav-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .nav-btn:hover {
+            background-color: #f3f4f6;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            text-align: center;
+        }
+
+        .weekday {
+            font-weight: 600;
+            color: var(--text-muted);
+            padding-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .weekday.sun { color: #ef4444; }
+        .weekday.sat { color: #3b82f6; }
+
+        .day-cell {
+            min-height: 110px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            cursor: pointer;
+            position: relative;
+            background-color: var(--card-bg);
+            transition: background-color 0.2s;
+        }
+
+        .day-cell:hover {
+            background-color: #f3f4f6;
+        }
+
+        .day-cell.other-month {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .day-cell.selected {
+            background-color: #e0e7ff;
+            border-color: var(--primary-color);
         }
         
-        /* 헤더(타이틀 및 링크) 영역 스타일 */
-        .header-container {
-            position: relative;
+        .day-cell.selected .day-num {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .day-cell.today {
+            background-color: #fffbeb;
+            border: 2px solid #f59e0b;
+        }
+        
+        .day-cell.today .day-num {
+            color: #d97706;
+            font-weight: bold;
+        }
+
+        .day-num {
+            font-size: 14px;
+            text-align: left;
+            margin-bottom: 4px;
+            padding-left: 2px;
+        }
+
+        .day-cell.sun .day-num { color: #ef4444; }
+        .day-cell.sat .day-num { color: #3b82f6; }
+
+        .badge-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            width: 100%;
+        }
+
+        .room-badge {
+            font-size: 11px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+        .room-badge.room-1 { background-color: #e0e7ff; color: #4338ca; } 
+        .room-badge.room-2 { background-color: #fef3c7; color: #d97706; } 
+        .room-badge.room-3 { background-color: #d1fae5; color: #059669; } 
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr 1.6fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            -webkit-appearance: none;
+            box-sizing: border-box;
+        }
+
+        input[type="date"].form-control {
+            padding: 9px 10px;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+
+        .row-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .time-compact-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .compact-input {
+            width: 48px; 
+            padding: 8px 4px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 15px;
+            text-align: center;
+            outline: none;
+            font-weight: 600;
+            color: var(--text-main);
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+            transition: border-color 0.2s;
+        }
+
+        .compact-input:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .compact-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-right: 6px;
+        }
+
+        .compact-label:last-child {
+            margin-right: 0;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .duration-btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .duration-btn {
+            background-color: #f3f4f6;
+            border: 1px solid var(--border-color);
+            padding: 8px 0;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1; 
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .duration-btn:hover {
+            background-color: #e5e7eb;
+            color: var(--text-main);
+            border-color: #cbd5e1;
+        }
+
+        .repeat-box {
+            background-color: #f3f4f6;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 8px;
+        }
+
+        .timeline-scroll {
+            max-height: 480px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: #fff;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .timeline-header-row, .timeline-row {
+            min-width: 480px; 
+            display: grid;
+            grid-template-columns: 100px 1fr 1fr 1fr;
+        }
+
+        .timeline-header-row {
+            position: sticky;
+            top: 0;
+            background-color: #f3f4f6;
+            font-weight: bold;
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 2px solid var(--border-color);
+            z-index: 10;
+            padding: 8px 0;
+        }
+
+        .timeline-row {
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+            align-items: center;
+            text-align: center;
+        }
+
+        .timeline-time-cell {
+            font-weight: 600;
+            color: var(--text-muted);
+            background-color: #f9fafb;
+            padding: 8px 0;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .timeline-room-cell {
+            padding: 4px;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 10px;
+            border-right: 1px solid var(--border-color);
         }
-        .header-container h1 {
-            margin: 0;
+        .timeline-room-cell:last-child {
+            border-right: none;
+        }
+
+        .status-available {
+            color: #10b981;
+            font-weight: 500;
+        }
+
+        .status-booked {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 11px;
+            padding: 4px 2px;
+            border-radius: 4px;
+        }
+        .status-booked.r1 { background-color: #fee2e2; color: #b91c1c; }
+        .status-booked.r2 { background-color: #fffbeb; color: #b45309; }
+        .status-booked.r3 { background-color: #ecfdf5; color: #047857; }
+
+        .multi-list-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        @media (min-width: 768px) {
+            .multi-list-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        .room-list-subcard {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #f9fafb;
+        }
+
+        .room-list-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .booking-list-container {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .booking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 5px;
+            font-size: 11px;
+            background-color: #fff;
+        }
+
+        .booking-info {
+            flex: 1;
+            padding-right: 8px;
+            line-height: 1.4;
+        }
+
+        .action-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-shrink: 0;
+            width: 55px; 
+        }
+        
+        .action-btn-group button {
+            width: 100%;
+            padding: 5px 0;
             text-align: center;
-            color: var(--primary-color);
-        }
-        .home-link {
-            position: absolute;
-            left: 0;
-            font-size: 12px;
-            color: #555;
-            text-decoration: none;
-            border: 1px solid #ccc;
-            padding: 6px 10px;
             border-radius: 4px;
-            background-color: #f8f9fa;
-            transition: all 0.2s;
-            font-weight: bold;
-        }
-        .home-link:hover { background-color: #e2e6ea; color: #333; }
-        .room-link {
-            position: absolute;
-            right: 0;
-            font-size: 12px;
-            color: #555;
-            text-decoration: none;
-            border: 1px solid #ccc;
-            padding: 6px 10px;
-            border-radius: 4px;
-            background-color: #f8f9fa;
-            transition: all 0.2s;
-            font-weight: bold;
-        }
-        .room-link:hover { background-color: #e2e6ea; color: #333; }
-        
-        /* 달력(Calendar) 스타일 */
-        .calendar-wrapper { margin-top: 10px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 6px; padding: 15px; background-color: #fdfdfd; }
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .calendar-header h2 { margin: 0; font-size: 18px; color: #333; }
-        .calendar-header button { width: 32px; padding: 5px; background-color: #f8f9fa; border: 1px solid #ccc; color: #333; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .calendar-header button:hover { background-color: #e2e6ea; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-        .cal-day-header { font-weight: bold; padding: 6px 0; background-color: #f0f4f8; border-radius: 4px; font-size: 13px; }
-        .cal-day-header:first-child { color: var(--error-color); } 
-        .cal-day-header:last-child { color: var(--primary-color); } 
-        .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 4px; }
-        .cal-cell { min-height: 55px; border: 1px solid #eaeaea; border-radius: 4px; padding: 4px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; background-color: #fff; }
-        .cal-cell.empty { background-color: transparent; border-color: transparent; cursor: default; }
-        .cal-cell:not(.empty):hover { background-color: #f1f7fd; border-color: #c6dfeb; }
-        .cal-cell.selected { background-color: #e9f2fb; border: 2px solid var(--primary-color); }
-        .cal-date-text { font-weight: bold; font-size: 13px; margin-bottom: 4px; color: #555; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%; }
-        .cal-cell.today .cal-date-text { background-color: var(--primary-color); color: white; }
-        .cal-badges { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; }
-        .cal-badge { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        .badge-car1 { background-color: var(--car1-color); }
-        .badge-car2 { background-color: var(--car2-color); }
-        .badge-car3 { background-color: var(--car3-color); }
-        .badge-car4 { background-color: var(--car4-color); }
-
-        /* 타임라인 스타일 */
-        .reservation-list { margin-top: 0; margin-bottom: 40px; }
-        .timeline-container { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 20px 15px; margin-top: 15px; overflow-x: auto; }
-        .timeline-row { display: flex; align-items: center; margin-bottom: 15px; min-width: 800px; }
-        .timeline-row:last-child { margin-bottom: 0; }
-        .vehicle-label-cell { width: 170px; font-weight: bold; font-size: 14px; color: #444; padding-right: 10px; flex-shrink: 0; }
-        .timeline-track-cell { flex: 1; position: relative; height: 44px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; box-sizing: border-box; }
-        .axis-row { margin-bottom: 8px; }
-        .axis-row .vehicle-label-cell { font-size: 12px; color: #777; }
-        .axis-track { display: flex; height: auto; background: none; border: none; }
-        .axis-track span { flex: 1; text-align: center; font-size: 11px; color: #666; font-weight: bold; }
-        .bg-grid { display: flex; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
-        .bg-grid span { flex: 1; border-right: 1px dashed #e9ecef; height: 100%; box-sizing: border-box; }
-        .bg-grid span:last-child { border-right: none; }
-        .blocks-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; }
-        
-        .timeline-block {
-            position: absolute; top: 5px; bottom: 5px; background-color: var(--primary-color);
-            color: white; border-radius: 4px; font-weight: bold;
-            display: flex; align-items: center; justify-content: center; overflow: hidden;
-            text-overflow: ellipsis; white-space: nowrap; padding: 0 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15); box-sizing: border-box; cursor: pointer; transition: all 0.2s;
-        }
-        .timeline-block:hover { filter: brightness(1.2); transform: scaleY(1.1); z-index: 10; border: 1px solid #003d82; }
-
-        /* 폼 요소 스타일 */
-        .form-group { margin-bottom: 20px; }
-        label.section-label { display: block; margin-bottom: 8px; font-weight: bold; }
-        input[type="text"], input[type="password"], input[type="date"], input[type="number"], input[type="month"] {
-            padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit; font-size: 15px;
-        }
-        
-        /* 24시 형태 드롭다운 스타일 */
-        .time-select {
-            padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; font-size: 15px;
-            background-color: #fff; flex: 1;
+            border: none;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
 
-        input[type="text"] { width: 100%; }
-        .radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
-        .radio-group input[type="radio"] { display: none; }
-        .radio-btn {
-            flex: 1; min-width: 120px; text-align: center; padding: 12px;
-            border: 1px solid #ccc; border-radius: 4px; cursor: pointer;
-            background-color: #f8f9fa; transition: all 0.2s ease-in-out; font-size: 15px; user-select: none;
-        }
-        .radio-btn:hover { background-color: #e9ecef; }
-        .radio-group input[type="radio"]:checked + .radio-btn {
-            background-color: var(--primary-color); color: white; border-color: var(--primary-color); font-weight: bold;
-        }
-        .flex-group { display: flex; align-items: center; gap: 10px; }
-        .flex-group input[type="date"] { flex: 2; }
-        .flex-group .time-select { flex: 1; }
-        .flex-group input[type="number"] { width: 80px; text-align: right; }
-        .flex-group .name-input { flex: 1; }
-        .flex-group .pw-input { width: 140px; }
-        .allday-label { white-space: nowrap; font-size: 14px; font-weight: bold; cursor: pointer; color: var(--primary-color); }
-        .error-banner {
-            display: none; background-color: #f8d7da; color: var(--error-color);
-            border: 1px solid #f5c6cb; padding: 12px; border-radius: 4px;
-            margin-bottom: 15px; font-weight: bold; font-size: 14px; text-align: center; line-height: 1.5;
-        }
-        
-        /* 등록/수정/취소 버튼 */
-        .btn-wrapper { display: flex; gap: 10px; }
-        button.submit-btn {
-            width: 100%; padding: 15px; background-color: var(--primary-color);
-            color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.2s;
-        }
-        button.submit-btn:hover { background-color: #004494; }
-        button.cancel-edit-btn {
-            display: none; width: 30%; padding: 15px; background-color: #6c757d;
-            color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.2s;
-        }
-        button.cancel-edit-btn:hover { background-color: #5a6268; }
+        .copy-btn { background-color: #3b82f6; }
+        .copy-btn:hover { background-color: #2563eb; }
 
-        /* 다운로드 영역 */
-        .download-section { margin-top: 50px; padding: 25px; background-color: #fdfdfd; border: 1px solid #ddd; border-radius: 8px; }
-        .download-section h2 { margin-top: 0; margin-bottom: 15px; font-size: 18px; color: #333; text-align: left; }
-        .download-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-        .dl-btn { background-color: var(--download-color); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
-        .dl-btn:hover { background-color: #146c43; }
+        .edit-btn { background-color: #f59e0b; }
+        .edit-btn:hover { background-color: #d97706; }
 
-        /* 간편 시간 버튼 */
-        .quick-time-btns { display: flex; gap: 8px; margin-top: 8px; }
-        .q-btn {
-            background-color: #f1f3f5; border: 1px solid #ced4da; border-radius: 4px;
-            padding: 6px 15px; font-size: 13px; font-weight: bold; color: #495057; cursor: pointer; transition: 0.2s;
-        }
-        .q-btn:hover { background-color: #e2e6ea; border-color: #dae0e5; color: #212529; }
+        .cancel-btn { background-color: #ef4444; }
+        .cancel-btn:hover { background-color: #dc2626; }
 
-        /* 팝업 모달 */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
-            z-index: 9999; display: none;
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .card { padding: 15px; }
+            #calendar-card { display: none; }
+            .section-title { font-size: 15px; }
+            h1 { font-size: 20px; }
+            
+            .header-container { 
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                min-height: auto;
+            }
+            .home-btn {
+                position: static;
+                justify-self: start;
+            }
+            .vehicle-link-btn {
+                position: static; 
+                justify-self: end;
+            }
+            h1 {
+                grid-column: 1 / -1; 
+                margin-top: 5px;
+            }
         }
-        .modal-box {
-            background: #fff; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .modal-box h3 { margin-top: 0; margin-bottom: 15px; color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; }
-        .modal-content-text { font-size: 14px; line-height: 1.6; margin-bottom: 25px; color: #444; }
-        .modal-btn-group { display: flex; gap: 10px; }
-        .modal-btn {
-            flex: 1; padding: 12px 5px; border: none; border-radius: 4px;
-            font-size: 14px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s;
-        }
-        
-        .btn-end { background-color: #198754; color: #fff; }
-        .btn-end:hover { background-color: #146c43; }
-        .btn-extend { background-color: #0dcaf0; color: #000; }
-        .btn-extend:hover { background-color: #31d2f2; }
-        .btn-primary { background-color: var(--primary-color); color: #fff; }
-        .btn-primary:hover { background-color: #004494; }
-        .btn-edit { background-color: var(--edit-color); color: #000; }
-        .btn-edit:hover { background-color: #e0a800; }
-        .btn-cancel { background-color: var(--error-color); color: #fff; }
-        .btn-cancel:hover { background-color: #bd2130; }
-        .btn-close { background-color: #6c757d; color: #fff; }
-        .btn-close:hover { background-color: #5a6268; }
     </style>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
 <div class="container">
+    
     <div class="header-container">
-        <a href="https://zihard86-creator.github.io/form-reserve-system/" class="home-link">&lt; 홈</a>
-        <h1>FORM ENG 법인차량 예약</h1>
-        <a href="https://zihard86-creator.github.io/reserve-meetingroom/" target="_blank" class="room-link">회의실 예약 바로가기 &gt;</a>
+        <a href="https://zihard86-creator.github.io/form-reserve-system/" class="home-btn">🏠 홈</a>
+        <h1>포엠이엔지 회의실 예약</h1>
+        <a href="https://zihard86-creator.github.io/reserve-car/" class="vehicle-link-btn" target="_blank">법인차량 예약 바로가기</a>
     </div>
 
-    <!-- 달력 영역 -->
-    <div class="calendar-wrapper">
+    <div class="card" id="calendar-card">
         <div class="calendar-header">
-            <button type="button" id="prevMonthBtn">&lt;</button>
-            <h2 id="calendarMonthText">2026년 6월</h2>
-            <button type="button" id="nextMonthBtn">&gt;</button>
+            <button class="nav-btn" id="btn-prev-month">◀ 이전 달</button>
+            <h2 id="calendar-month-year">계산 중...</h2>
+            <button class="nav-btn" id="btn-next-month">다음 달 ▶</button>
         </div>
-        <div style="text-align: right; margin-bottom: 8px; font-size: 11px; color: #666;">
-            <span class="cal-badge badge-car1"></span> 트레일블레이저
-            <span class="cal-badge badge-car2" style="margin-left:8px;"></span> 1톤(6891)
-            <span class="cal-badge badge-car3" style="margin-left:8px;"></span> 1톤(7539)
-            <span class="cal-badge badge-car4" style="margin-left:8px;"></span> 3.5톤(6430)
-        </div>
-        <div class="calendar-grid">
-            <div class="cal-day-header">일</div>
-            <div class="cal-day-header">월</div>
-            <div class="cal-day-header">화</div>
-            <div class="cal-day-header">수</div>
-            <div class="cal-day-header">목</div>
-            <div class="cal-day-header">금</div>
-            <div class="cal-day-header">토</div>
-        </div>
-        <div class="calendar-days" id="calendarDays"></div>
+        <div class="calendar-grid" id="calendar-grid"></div>
     </div>
-    
-    <!-- 타임라인 영역 -->
-    <div class="reservation-list">
-        <h2 id="timelineTitle">선택일자 24시간 예약 현황</h2>
-        <p style="text-align: center; color: #666; font-size: 14px; margin-top: -10px; margin-bottom: 20px;">
-            ※ 위 달력에서 날짜를 클릭하시면 해당 일자의 타임라인이 표시됩니다.<br>
-            ※ 예약 블록(이름)을 <b>클릭</b>하시면 <b>자동으로 공지가 복사</b>되며 상세/수정 창이 열립니다.
-        </p>
-        
-        <div class="timeline-container">
-            <div class="timeline-row axis-row">
-                <div class="vehicle-label-cell">차량 / 시간축</div>
-                <div class="timeline-track-cell axis-track">
-                    <span>00</span><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span>
-                    <span>06</span><span>07</span><span>08</span><span>09</span><span>10</span><span>11</span>
-                    <span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span>
-                    <span>18</span><span>19</span><span>20</span><span>21</span><span>22</span><span>23</span>
+
+    <div class="main-content">
+        <div class="card">
+            <h3 class="section-title"><span id="info-target-date"></span> 예약 신청</h3>
+            <form id="booking-form">
+                <div class="form-group">
+                    <label>대상 회의실 선택</label>
+                    <div class="room-toggle">
+                        <button type="button" id="btn-room1" class="room-btn active">1층 회의실</button>
+                        <button type="button" id="btn-room2" class="room-btn">2층 회의실</button>
+                        <button type="button" id="btn-room3" class="room-btn">조립반</button>
+                    </div>
                 </div>
-            </div>
+
+                <div class="form-group">
+                    <label>예약 날짜</label>
+                    <input type="date" id="booking-date" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label>부서명</label>
+                    <input type="text" id="dept-name" class="form-control" placeholder="예: R&D 기획팀" required>
+                </div>
+                
+                <div class="row-group">
+                    <div class="form-group">
+                        <label>예약자 이름</label>
+                        <input type="text" id="user-name" class="form-control" placeholder="예: 홍길동" required>
+                    </div>
+                    <div class="form-group">
+                        <label>예약 비밀번호</label>
+                        <input type="password" id="booking-pwd" class="form-control" placeholder="취소/수정 시 필요" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>이용 사유</label>
+                    <input type="text" id="purpose" class="form-control" placeholder="예: 주간 정기 회의" required>
+                </div>
+                
+                <div class="row-group">
+                    <div class="form-group">
+                        <label>시작 시간</label>
+                        <div class="time-compact-group">
+                            <input type="number" id="start-hour" class="compact-input" min="8" max="19" value="08" placeholder="08" required>
+                            <span class="compact-label">시</span>
+                            <input type="number" id="start-minute" class="compact-input" min="0" max="59" value="00" placeholder="00" required>
+                            <span class="compact-label">분</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>종료 시간</label>
+                        <div class="time-compact-group">
+                            <input type="number" id="end-hour" class="compact-input" min="8" max="20" value="08" placeholder="08" required>
+                            <span class="compact-label">시</span>
+                            <input type="number" id="end-minute" class="compact-input" min="0" max="59" value="30" placeholder="00" required>
+                            <span class="compact-label">분</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>빠른 종료 시간 연장 (클릭 시 누적)</label>
+                    <div class="duration-btn-group">
+                        <button type="button" class="duration-btn" data-add="10">+10분</button>
+                        <button type="button" class="duration-btn" data-add="30">+30분</button>
+                        <button type="button" class="duration-btn" data-add="60">+1시간</button>
+                    </div>
+                </div>
+
+                <div class="repeat-box">
+                    <div class="row-group">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>반복 설정</label>
+                            <select id="repeat-type" class="form-control">
+                                <option value="none">반복 안 함</option>
+                                <option value="daily">매일 반복</option>
+                                <option value="weekly">매주 반복</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="repeat-count-group" style="margin-bottom:0; display:none;">
+                            <label>반복 횟수</label>
+                            <select id="repeat-count" class="form-control">
+                                <option value="2">2회 반복</option>
+                                <option value="3">3회 반복</option>
+                                <option value="4">4회 반복</option>
+                                <option value="5">5회 반복</option>
+                                <option value="6">6회 반복</option>
+                                <option value="7">7회 반복</option>
+                                <option value="8">8회 반복</option>
+                                <option value="9">9회 반복</option>
+                                <option value="10">10회 반복</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button type="submit" class="submit-btn" id="main-submit-btn" style="flex: 2;">예약하기</button>
+                    <button type="button" class="cancel-btn" id="cancel-edit-btn" style="display: none; flex: 1; font-size: 16px; padding: 14px; border-radius: 6px; margin-top: 10px; width: 100%;">수정 취소</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3 class="section-title">전체 회의실 종합 타임라인 (08:00 ~ 20:00)</h3>
             
-            <div class="timeline-row">
-                <div class="vehicle-label-cell">트레일블레이저(1165)</div>
-                <div class="timeline-track-cell">
-                    <div class="bg-grid"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                    <div class="blocks-overlay" id="overlay-car1"></div>
+            <div class="timeline-scroll">
+                <div class="timeline-header-row">
+                    <div>시간</div>
+                    <div style="color: #4338ca;">1층 회의실</div>
+                    <div style="color: #b45309;">2층 회의실</div>
+                    <div style="color: #047857;">조립반</div>
+                </div>
+                <div id="timeline-rows-container"></div>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 18px;">각 회의실별 상세 내역 리스트</h3>
+            
+            <div class="multi-list-grid">
+                <div class="room-list-subcard">
+                    <div class="room-list-title" style="color:#4338ca; border-left:3px solid #4338ca; padding-left:5px;">1층 회의실</div>
+                    <div class="booking-list-container" id="list-room-1"></div>
+                </div>
+                <div class="room-list-subcard">
+                    <div class="room-list-title" style="color:#b45309; border-left:3px solid #b45309; padding-left:5px;">2층 회의실</div>
+                    <div class="booking-list-container" id="list-room-2"></div>
+                </div>
+                <div class="room-list-subcard">
+                    <div class="room-list-title" style="color:#047857; border-left:3px solid #047857; padding-left:5px;">조립반</div>
+                    <div class="booking-list-container" id="list-room-3"></div>
                 </div>
             </div>
-            <div class="timeline-row">
-                <div class="vehicle-label-cell">1톤(6891)</div>
-                <div class="timeline-track-cell">
-                    <div class="bg-grid"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                    <div class="blocks-overlay" id="overlay-car2"></div>
-                </div>
-            </div>
-            <div class="timeline-row">
-                <div class="vehicle-label-cell">1톤(7539)</div>
-                <div class="timeline-track-cell">
-                    <div class="bg-grid"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                    <div class="blocks-overlay" id="overlay-car3"></div>
-                </div>
-            </div>
-            <div class="timeline-row">
-                <div class="vehicle-label-cell">3.5톤(6430)</div>
-                <div class="timeline-track-cell">
-                    <div class="bg-grid"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                    <div class="blocks-overlay" id="overlay-car4"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <hr style="border: 0; height: 1px; background: #ddd; margin: 40px 0;">
-    
-    <!-- 예약 폼 영역 -->
-    <h2>새로운 예약 등록</h2>
-    <form id="reservationForm">
-        <div class="form-group">
-            <label class="section-label">예약자 성명 및 취소/수정 비밀번호</label>
-            <div class="flex-group">
-                <input type="text" id="userName" class="name-input" placeholder="이름을 입력하세요" required>
-                <input type="password" id="password" class="pw-input" placeholder="비밀번호 4자리" maxlength="4" pattern="\d{4}" title="숫자 4자리를 입력하세요" required>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="section-label" for="destination">목적지</label>
-            <input type="text" id="destination" placeholder="예: 화성 공장, 서울 본사 등" required>
-        </div>
-
-        <div class="form-group">
-            <label class="section-label" for="purpose">사용 목적</label>
-            <input type="text" id="purpose" placeholder="예: 부품 수령, 현장 미팅 등" required>
-        </div>
-        
-        <div class="form-group">
-            <label class="section-label">차량 선택</label>
-            <div class="radio-group" id="vehicleRadioGroup">
-                <input type="radio" id="car1" name="vehicle" value="트레일블레이저(1165)" required>
-                <label for="car1" class="radio-btn">트레일블레이저<br>(1165)</label>
-                <input type="radio" id="car2" name="vehicle" value="1톤(6891)">
-                <label for="car2" class="radio-btn">1톤<br>(6891)</label>
-                <input type="radio" id="car3" name="vehicle" value="1톤(7539)">
-                <label for="car3" class="radio-btn">1톤<br>(7539)</label>
-                <input type="radio" id="car4" name="vehicle" value="3.5톤(6430)">
-                <label for="car4" class="radio-btn">3.5톤<br>(6430)<br>&nbsp;</label>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="section-label">이용 시작 일시(키보드 입력 가능)</label>
-            <div class="flex-group">
-                <input type="date" id="startDate" required title="시작 날짜">
-                <select id="startHour" class="time-select" required></select>
-                <span style="font-weight:bold; color:#555;">:</span>
-                <select id="startMinute" class="time-select" required></select>
-                <label class="allday-label">
-                    <input type="checkbox" id="allDayCheck" style="margin: 0; vertical-align: middle;"> 종일
-                </label>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="section-label">운행 종료 일시(키보드 입력 가능)</label>
-            <div class="flex-group">
-                <input type="date" id="endDate" required title="반납 날짜">
-                <select id="endHour" class="time-select" required></select>
-                <span style="font-weight:bold; color:#555;">:</span>
-                <select id="endMinute" class="time-select" required></select>
-                <span class="allday-label" style="visibility: hidden;">
-                    <input type="checkbox" style="margin: 0; vertical-align: middle;"> 종일
-                </span>
-            </div>
-            <div class="quick-time-btns">
-                <button type="button" class="q-btn" id="btnAdd30m">+30분</button>
-                <button type="button" class="q-btn" id="btnAdd1h">+1시간</button>
-                <button type="button" class="q-btn" id="btnAdd1d">+1일</button>
-            </div>
-        </div>
-
-        <div id="errorBanner" class="error-banner"></div>
-
-        <div class="btn-wrapper">
-            <button type="submit" class="submit-btn" id="mainSubmitBtn">예약 등록하기</button>
-            <button type="button" class="cancel-edit-btn" id="btnCancelEdit">수정 취소</button>
-        </div>
-    </form>
-
-    <div class="download-section">
-        <h2>📊 월간 운행일지 다운로드 (Excel 파일)</h2>
-        <div class="download-controls">
-            <input type="month" id="downloadMonth" title="다운로드할 월 선택" required>
-            <button type="button" class="dl-btn" data-car="트레일블레이저(1165)">트레일블레이저(1165)</button>
-            <button type="button" class="dl-btn" data-car="1톤(6891)">1톤(6891)</button>
-            <button type="button" class="dl-btn" data-car="1톤(7539)">1톤(7539)</button>
-            <button type="button" class="dl-btn" data-car="3.5톤(6430)">3.5톤(6430)</button>
         </div>
     </div>
 </div>
 
-<!-- 상세/수정/취소 팝업 모달 HTML -->
-<div id="resModal" class="modal-overlay">
-    <div class="modal-box">
-        <h3>예약 확인 및 관리</h3>
-        <div id="modalContent" class="modal-content-text">
-            </div>
-        <div class="modal-btn-group" style="margin-bottom: 10px;">
-            <button type="button" id="btnModalEnd" class="modal-btn btn-end">운행 종료</button>
-            <button type="button" id="btnModalExtend" class="modal-btn btn-extend">운행 연장</button>
-        </div>
-        <div class="modal-btn-group">
-            <button type="button" id="btnModalEdit" class="modal-btn btn-edit">예약 수정</button>
-            <button type="button" id="btnModalCancel" class="modal-btn btn-cancel">예약 취소</button>
-            <button type="button" id="btnModalClose" class="modal-btn btn-close">닫기</button>
-        </div>
-    </div>
-</div>
-
-<!-- 운행 연장 전용 모달 -->
-<div id="extendModal" class="modal-overlay">
-    <div class="modal-box">
-        <h3>운행 시간 연장</h3>
-        <p style="font-size:13px; color:#666; margin-bottom:15px;">연장할 반납 일시를 선택해주세요.</p>
-        <div class="flex-group" style="margin-bottom: 20px;">
-            <input type="date" id="extendEndDate" style="flex:2;" required>
-            <select id="extendEndHour" class="time-select" style="flex:1;" required></select>
-            <span style="font-weight:bold; color:#555;">:</span>
-            <select id="extendEndMinute" class="time-select" style="flex:1;" required></select>
-        </div>
-        <div class="modal-btn-group">
-            <button type="button" id="btnExtendSubmit" class="modal-btn btn-primary">연장 적용</button>
-            <button type="button" id="btnExtendCancel" class="modal-btn btn-close">취소</button>
-        </div>
-    </div>
-</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-    // --- 수정됨: 제공된 이미지 정보로 Firebase 연결 설정 업데이트 ---
+<script>
     const firebaseConfig = {
-        apiKey: "AIzaSyBMneQUm8X-2z6j1YP2CD88tWyr03hk_oQ",
-        authDomain: "meng-5e370.firebaseapp.com",
-        projectId: "meng-5e370",
-        storageBucket: "meng-5e370.firebasestorage.app",
-        messagingSenderId: "473670492005",
-        appId: "1:473670492005:web:31a7691b232567b1df8b8c"
+        apiKey: "AIzaSyBRwg3k5usuMkBXH9LB6T-9Uuw9ZU1TBMs",
+        authDomain: "formeng-7c4b3.firebaseapp.com",
+        databaseURL: "https://formeng-7c4b3-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "formeng-7c4b3",
+        storageBucket: "formeng-7c4b3.firebasestorage.app",
+        messagingSenderId: "745402830490",
+        appId: "1:745402830490:web:113c3abf53bbd405b8d923"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const dbRef = db.ref('reservations');
 
-    const form = document.getElementById('reservationForm');
-    const errorBanner = document.getElementById('errorBanner');
+    let currentRoom = '1층 회의실';
+    let currentDate = new Date();
+    let selectedDateStr = formatDate(currentDate);
+    let reservations = { '1층 회의실': {}, '2층 회의실': {}, '조립반 회의실': {} };
     
-    const startDateInput = document.getElementById('startDate');
-    const startHourSelect = document.getElementById('startHour');
-    const startMinuteSelect = document.getElementById('startMinute');
-    
-    const endDateInput = document.getElementById('endDate');
-    const endHourSelect = document.getElementById('endHour');
-    const endMinuteSelect = document.getElementById('endMinute');
-    
-    const allDayCheck = document.getElementById('allDayCheck');
-    const vehicleRadioGroup = document.getElementById('vehicleRadioGroup');
-    const downloadMonthInput = document.getElementById('downloadMonth');
-    
-    let allReservations = []; 
-    let currentCalDate = new Date(); 
-    let selectedReservation = null;
-    let editingId = null; 
-    let previousStartTime = null; 
+    let editingReservation = null; 
 
-    function populateTimeSelects() {
-        let hHtml = "";
-        for (let i = 0; i < 24; i++) {
-            let val = String(i).padStart(2, '0');
-            hHtml += `<option value="${val}">${val}시</option>`;
+    const SYSTEM_START_TIME = 8 * 60; 
+    const SYSTEM_END_TIME = 20 * 60;   
+
+    function formatDate(date) {
+        const d = new Date(date);
+        return [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'), String(d.getDate()).padStart(2, '0')].join('-');
+    }
+
+    function getDayBookingsArray(room, dateStr) {
+        const dayObj = reservations[room]?.[dateStr];
+        if (!dayObj) return [];
+        return Object.keys(dayObj).map(key => {
+            const item = dayObj[key];
+            let startMinutes = item.startMinutes;
+            let durationMinutes = item.durationMinutes;
+            if (startMinutes === undefined && item.start !== undefined) {
+                startMinutes = item.start * 60;
+                durationMinutes = item.duration * 60;
+            }
+            return {
+                id: key,
+                dept: item.dept,
+                name: item.name,
+                purpose: item.purpose,
+                pwd: item.pwd || '', 
+                startMinutes: startMinutes,
+                durationMinutes: durationMinutes
+            };
+        });
+    }
+
+    function minutesToTimeString(minutes) {
+        const h = Math.floor(minutes / 60);
+        const m = minutes % 60;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
+    function makeBadgeText(roomLabel, bookings) {
+        if (bookings.length === 1) {
+            const startStr = minutesToTimeString(bookings[0].startMinutes);
+            const endStr = minutesToTimeString(bookings[0].startMinutes + bookings[0].durationMinutes);
+            return `${roomLabel}: ${startStr}~${endStr}`;
         }
-        let mHtml = "";
-        const mins = ['00', '10', '20', '30', '40', '50', '59'];
-        for (let m of mins) {
-            mHtml += `<option value="${m}">${m}분</option>`;
-        }
-        startHourSelect.innerHTML = hHtml;
-        endHourSelect.innerHTML = hHtml;
-        document.getElementById('extendEndHour').innerHTML = hHtml;
-        
-        startMinuteSelect.innerHTML = mHtml;
-        endMinuteSelect.innerHTML = mHtml;
-        document.getElementById('extendEndMinute').innerHTML = mHtml; 
-    }
-    populateTimeSelects();
-
-    function getNowFormatted() {
-        const now = new Date();
-        const y = now.getFullYear();
-        const m = String(now.getMonth() + 1).padStart(2, '0');
-        const d = String(now.getDate()).padStart(2, '0');
-        const h = String(now.getHours()).padStart(2, '0');
-        const min = String(now.getMinutes()).padStart(2, '0');
-        return `${y}-${m}-${d}T${h}:${min}`;
+        return `${roomLabel}: ${bookings.length}건`;
     }
 
-    function getCombinedStartString() {
-        const d = startDateInput.value;
-        const h = startHourSelect.value;
-        const m = startMinuteSelect.value;
-        if (!d || !h || !m) return null;
-        return `${d}T${h}:${m}`;
-    }
-    
-    function getCombinedEndString() {
-        const d = endDateInput.value;
-        const h = endHourSelect.value;
-        const m = endMinuteSelect.value;
-        if (!d || !h || !m) return null;
-        return `${d}T${h}:${m}`;
+    function switchRoom(roomName) {
+        currentRoom = roomName;
+        document.getElementById('btn-room1').classList.toggle('active', roomName === '1층 회의실');
+        document.getElementById('btn-room2').classList.toggle('active', roomName === '2층 회의실');
+        document.getElementById('btn-room3').classList.toggle('active', roomName === '조립반 회의실');
+        updateDashboard();
     }
 
-    function setDefaultTimes() {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        
-        startDateInput.value = `${year}-${month}-${day}`;
-        endDateInput.value = `${year}-${month}-${day}`;
-        
-        downloadMonthInput.value = `${year}-${month}`;
-        
-        let currentH = String(now.getHours()).padStart(2, '0');
-        let mRounded = String(Math.floor(now.getMinutes() / 10) * 10).padStart(2, '0');
-        
-        startHourSelect.value = currentH;
-        startMinuteSelect.value = mRounded;
-        
-        let endH = String(Math.min(now.getHours() + 1, 23)).padStart(2, '0');
-        endHourSelect.value = endH;
-        endMinuteSelect.value = mRounded;
-        
-        previousStartTime = getCombinedStartString(); 
-        currentCalDate = new Date(); 
-
-        if(allDayCheck.checked) {
-            startHourSelect.value = '00';
-            startMinuteSelect.value = '00';
-            endHourSelect.value = '23';
-            endMinuteSelect.value = '59';
-        }
-
-        hideError(); 
+    function changeMonth(offset) {
+        currentDate.setMonth(currentDate.getMonth() + offset);
         renderCalendar();
-    }
-
-    function handleStartTimeChange() {
-        hideError();
-        
-        const currentStartStr = getCombinedStartString();
-        const currentEndStr = getCombinedEndString();
-        
-        if (!currentStartStr || !currentEndStr || !previousStartTime) {
-            previousStartTime = currentStartStr;
-            return;
-        }
-
-        const oldStart = new Date(previousStartTime);
-        const newStart = new Date(currentStartStr);
-        const currentEnd = new Date(currentEndStr);
-
-        if (!isNaN(oldStart) && !isNaN(newStart) && !isNaN(currentEnd)) {
-            const diffTime = newStart.getTime() - oldStart.getTime();
-            currentEnd.setTime(currentEnd.getTime() + diffTime);
-            
-            const ey = currentEnd.getFullYear();
-            const em = String(currentEnd.getMonth() + 1).padStart(2, '0');
-            const ed = String(currentEnd.getDate()).padStart(2, '0');
-            const eh = String(currentEnd.getHours()).padStart(2, '0');
-            
-            let emin = String(currentEnd.getMinutes()).padStart(2, '0');
-            if (!['00','10','20','30','40','50','59'].includes(emin)) {
-                emin = String(Math.floor(currentEnd.getMinutes() / 10) * 10).padStart(2, '0');
-            }
-
-            endDateInput.value = `${ey}-${em}-${ed}`;
-            endHourSelect.value = eh;
-            endMinuteSelect.value = emin;
-        }
-
-        previousStartTime = currentStartStr;
-        renderCalendar(); 
-        renderTimeline(); 
-    }
-
-    startDateInput.addEventListener('input', () => { 
-        currentCalDate = new Date(startDateInput.value);
-        handleStartTimeChange(); 
-    });
-    startHourSelect.addEventListener('change', handleStartTimeChange);
-    startMinuteSelect.addEventListener('change', handleStartTimeChange);
-
-    function addQuickTime(value, unit) {
-        const ed = endDateInput.value;
-        const eh = endHourSelect.value;
-        const em = endMinuteSelect.value;
-        if (!ed || !eh || !em) return;
-        
-        let targetTime = new Date(`${ed}T${eh}:${em}`);
-        if (isNaN(targetTime.getTime())) return;
-
-        if (unit === 'minute') targetTime.setMinutes(targetTime.getMinutes() + value);
-        if (unit === 'hour') targetTime.setHours(targetTime.getHours() + value);
-        if (unit === 'day') targetTime.setDate(targetTime.getDate() + value);
-
-        let newMin = targetTime.getMinutes();
-        if (newMin !== 59 && newMin % 10 !== 0) {
-            newMin = Math.round(newMin / 10) * 10;
-            if (newMin === 60) {
-                newMin = 0;
-                targetTime.setHours(targetTime.getHours() + 1);
-            }
-            targetTime.setMinutes(newMin);
-        }
-
-        const newEy = targetTime.getFullYear();
-        const newEm = String(targetTime.getMonth() + 1).padStart(2, '0');
-        const newEd = String(targetTime.getDate()).padStart(2, '0');
-        const newEh = String(targetTime.getHours()).padStart(2, '0');
-        const newEmin = String(targetTime.getMinutes()).padStart(2, '0');
-
-        endDateInput.value = `${newEy}-${newEm}-${newEd}`;
-        endHourSelect.value = newEh;
-        endMinuteSelect.value = newEmin;
-        hideError();
-    }
-
-    document.getElementById('btnAdd30m').addEventListener('click', () => addQuickTime(30, 'minute'));
-    document.getElementById('btnAdd1h').addEventListener('click', () => addQuickTime(1, 'hour'));
-    document.getElementById('btnAdd1d').addEventListener('click', () => addQuickTime(1, 'day'));
-
-    allDayCheck.addEventListener('change', (e) => {
-        const els = ['startHour', 'startMinute', 'endHour', 'endMinute'];
-        if (e.target.checked) {
-            startHourSelect.value = '00';
-            startMinuteSelect.value = '00';
-            endHourSelect.value = '23';
-            endMinuteSelect.value = '59';
-            els.forEach(id => {
-                document.getElementById(id).disabled = true;
-                document.getElementById(id).style.backgroundColor = '#e9ecef';
-            });
-            previousStartTime = getCombinedStartString();
-        } else {
-            els.forEach(id => {
-                document.getElementById(id).disabled = false;
-                document.getElementById(id).style.backgroundColor = '';
-            });
-            const now = new Date();
-            let currentH = String(now.getHours()).padStart(2, '0');
-            let mRounded = String(Math.floor(now.getMinutes() / 10) * 10).padStart(2, '0');
-            startHourSelect.value = currentH;
-            startMinuteSelect.value = mRounded;
-            let endH = String(Math.min(now.getHours() + 1, 23)).padStart(2, '0');
-            endHourSelect.value = endH;
-            endMinuteSelect.value = mRounded;
-            previousStartTime = getCombinedStartString();
-        }
-        hideError();
-    });
-
-    function showError(message) {
-        errorBanner.innerText = message;
-        errorBanner.style.display = 'block';
-    }
-    function hideError() {
-        errorBanner.style.display = 'none';
-        errorBanner.innerText = '';
     }
 
     function renderCalendar() {
-        const year = currentCalDate.getFullYear();
-        const month = currentCalDate.getMonth();
-        document.getElementById('calendarMonthText').innerText = `${year}년 ${month + 1}월`;
+        const grid = document.getElementById('calendar-grid');
+        grid.innerHTML = '';
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
         
-        const firstDay = new Date(year, month, 1).getDay(); 
-        const lastDate = new Date(year, month + 1, 0).getDate(); 
-        const calendarDays = document.getElementById('calendarDays');
-        calendarDays.innerHTML = '';
-        const selectedDateStr = startDateInput.value; 
-        
-        const todayObj = new Date();
-        const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+        document.getElementById('calendar-month-year').textContent = `${year}년 ${String(month + 1).padStart(2, '0')}월`;
 
-        for(let i = 0; i < firstDay; i++) {
-            calendarDays.innerHTML += `<div class="cal-cell empty"></div>`;
+        const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+        weekdays.forEach((day, i) => {
+            const header = document.createElement('div');
+            header.className = `weekday ${i===0?'sun':i===6?'sat':''}`;
+            header.textContent = day;
+            grid.appendChild(header);
+        });
+
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        
+        for (let i = 0; i < firstDay.getDay(); i++) {
+            const cell = document.createElement('div');
+            cell.className = 'day-cell other-month';
+            grid.appendChild(cell);
         }
 
-        for(let i = 1; i <= lastDate; i++) {
-            const cellDateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-            const isSelected = (selectedDateStr === cellDateStr) ? 'selected' : '';
-            const isToday = (todayStr === cellDateStr) ? 'today' : ''; 
+        const actualTodayStr = formatDate(new Date());
+
+        for (let d = 1; d <= lastDay.getDate(); d++) {
+            const cellDate = new Date(year, month, d);
+            const dateStr = formatDate(cellDate);
             
-            let cellHtml = `<div class="cal-cell ${isSelected} ${isToday}" data-date="${cellDateStr}">
-                                <div class="cal-date-text">${i}</div>
-                                <div class="cal-badges">`;
-            
-            const cellStart = new Date(`${cellDateStr}T00:00:00`).getTime();
-            const cellEnd = new Date(`${cellDateStr}T23:59:59`).getTime();
-            
-            const bookedVehicles = new Set();
-            allReservations.forEach(res => {
-                const rStart = new Date(res.startTime).getTime();
-                const rEnd = new Date(res.endTime).getTime();
-                if (rStart <= cellEnd && rEnd >= cellStart) {
-                    bookedVehicles.add(res.vehicle);
+            const isSelected = dateStr === selectedDateStr;
+            const isToday = dateStr === actualTodayStr;
+
+            const cell = document.createElement('div');
+            cell.className = `day-cell ${cellDate.getDay()===0?'sun':cellDate.getDay()===6?'sat':''} ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`;
+
+            cell.onclick = () => {
+                selectedDateStr = dateStr;
+                document.getElementById('booking-date').value = selectedDateStr;
+                document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('selected'));
+                cell.classList.add('selected');
+                updateDashboard();
+            };
+
+            const numDiv = document.createElement('div');
+            numDiv.className = 'day-num';
+            numDiv.textContent = d;
+            cell.appendChild(numDiv);
+
+            const r1Bookings = getDayBookingsArray('1층 회의실', dateStr).sort((a,b) => a.startMinutes - b.startMinutes);
+            const r2Bookings = getDayBookingsArray('2층 회의실', dateStr).sort((a,b) => a.startMinutes - b.startMinutes);
+            const r3Bookings = getDayBookingsArray('조립반 회의실', dateStr).sort((a,b) => a.startMinutes - b.startMinutes);
+
+            const badgeContainer = document.createElement('div');
+            badgeContainer.className = 'badge-container';
+
+            if (r1Bookings.length > 0) {
+                const b1 = document.createElement('div');
+                b1.className = 'room-badge room-1';
+                b1.textContent = makeBadgeText('1층', r1Bookings);
+                badgeContainer.appendChild(b1);
+            }
+            if (r2Bookings.length > 0) {
+                const b2 = document.createElement('div');
+                b2.className = 'room-badge room-2';
+                b2.textContent = makeBadgeText('2층', r2Bookings);
+                badgeContainer.appendChild(b2);
+            }
+            if (r3Bookings.length > 0) {
+                const b3 = document.createElement('div');
+                b3.className = 'room-badge room-3';
+                b3.textContent = makeBadgeText('조립', r3Bookings);
+                badgeContainer.appendChild(b3);
+            }
+
+            cell.appendChild(badgeContainer);
+            grid.appendChild(cell);
+        }
+    }
+
+    function updateDashboard() {
+        document.getElementById('info-target-date').textContent = '';
+        renderCombinedTimeline();
+        renderAllBookingLists();
+    }
+
+    function renderCombinedTimeline() {
+        const container = document.getElementById('timeline-rows-container');
+        container.innerHTML = '';
+
+        const r1Bookings = getDayBookingsArray('1층 회의실', selectedDateStr);
+        const r2Bookings = getDayBookingsArray('2층 회의실', selectedDateStr);
+        const r3Bookings = getDayBookingsArray('조립반 회의실', selectedDateStr);
+
+        for (let timeMinutes = SYSTEM_START_TIME; timeMinutes < SYSTEM_END_TIME; timeMinutes += 30) {
+            const row = document.createElement('div');
+            row.className = 'timeline-row';
+
+            const startH = Math.floor(timeMinutes / 60);
+            const startM = timeMinutes % 60;
+            const endTotal = timeMinutes + 30;
+            const endH = Math.floor(endTotal / 60);
+            const endM = endTotal % 60;
+
+            const timeCell = document.createElement('div');
+            timeCell.className = 'timeline-time-cell';
+            timeCell.textContent = `${String(startH).padStart(2, '0')}:${String(startM).padStart(2, '0')}~${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+            row.appendChild(timeCell);
+
+            const roomsData = [
+                { id: '1층 회의실', list: r1Bookings, styleClass: 'r1' },
+                { id: '2층 회의실', list: r2Bookings, styleClass: 'r2' },
+                { id: '조립반 회의실', list: r3Bookings, styleClass: 'r3' }
+            ];
+
+            roomsData.forEach(room => {
+                const cell = document.createElement('div');
+                cell.className = 'timeline-room-cell';
+
+                const match = room.list.find(b => {
+                    const blockStart = timeMinutes;
+                    const blockEnd = timeMinutes + 30;
+                    const bookStart = b.startMinutes;
+                    const bookEnd = b.startMinutes + b.durationMinutes;
+                    
+                    return (blockStart < bookEnd) && (blockEnd > bookStart); 
+                });
+                
+                if (match) {
+                    const bookedDiv = document.createElement('div');
+                    bookedDiv.className = `status-booked ${room.styleClass}`;
+                    bookedDiv.innerHTML = `<span>${match.dept}</span><span style="font-weight:normal; opacity:0.85;">${match.name}</span>`;
+                    bookedDiv.title = `사유: ${match.purpose}`;
+                    cell.appendChild(bookedDiv);
+                } else {
+                    const availSpan = document.createElement('span');
+                    availSpan.className = 'status-available';
+                    availSpan.textContent = '예약 가능';
+                    cell.appendChild(availSpan);
                 }
+                row.appendChild(cell);
             });
 
-            bookedVehicles.forEach(v => {
-                let badgeClass = '';
-                if(v.includes('트레일')) badgeClass = 'badge-car1';
-                else if(v.includes('6891')) badgeClass = 'badge-car2';
-                else if(v.includes('7539')) badgeClass = 'badge-car3';
-                else if(v.includes('6430')) badgeClass = 'badge-car4';
-                cellHtml += `<span class="cal-badge ${badgeClass}" title="${v}"></span>`;
-            });
-
-            cellHtml += `</div></div>`;
-            calendarDays.innerHTML += cellHtml;
+            container.appendChild(row);
         }
+    }
 
-        document.querySelectorAll('.cal-cell:not(.empty)').forEach(cell => {
-            cell.addEventListener('click', function() {
-                const clickedDate = this.getAttribute('data-date');
-                startDateInput.value = clickedDate; 
-                handleStartTimeChange(); 
+    // 💡 복사 버튼 클릭 시 요일이 포함된 형태로 복사되도록 수정
+    function copyReservationInfo(dept, room, dateStr, startMins, durationMins) {
+        const startH = Math.floor(startMins / 60);
+        const startM = startMins % 60;
+        const endTotal = startMins + durationMins;
+        const endH = Math.floor(endTotal / 60);
+        const endM = endTotal % 60;
+        
+        const timeString = `${String(startH).padStart(2, '0')}:${String(startM).padStart(2, '0')} ~ ${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+        
+        // 요일 계산 로직 추가
+        const dateObj = new Date(dateStr);
+        const days = ['일', '월', '화', '수', '목', '금', '토'];
+        const dayOfWeek = days[dateObj.getDay()];
+        
+        // 공지 형태의 텍스트 구성 (요일 포함)
+        const textToCopy = `[회의실 예약 공지]\n- 부서: ${dept}\n- 회의실: ${room}\n- 사용일자: ${dateStr} (${dayOfWeek})\n- 시간: ${timeString}`;
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            alert('예약 내용이 클립보드에 복사되었습니다.\n원하는 곳에 붙여넣기(Ctrl+V) 하세요.');
+        }).catch(err => {
+            alert('복사에 실패했습니다: ' + err);
+        });
+    }
+
+    function renderAllBookingLists() {
+        const roomsConfig = [
+            { id: '1층 회의실', targetElementId: 'list-room-1' },
+            { id: '2층 회의실', targetElementId: 'list-room-2' },
+            { id: '조립반 회의실', targetElementId: 'list-room-3' }
+        ];
+
+        roomsConfig.forEach(config => {
+            const listContainer = document.getElementById(config.targetElementId);
+            listContainer.innerHTML = '';
+            const dayBookings = getDayBookingsArray(config.id, selectedDateStr);
+
+            if (dayBookings.length === 0) {
+                listContainer.innerHTML = '<p style="font-size: 11px; color: var(--text-muted); text-align:center; padding:15px 0;">예약 없음</p>';
+                return;
+            }
+
+            const sortedBookings = [...dayBookings].sort((a, b) => a.startMinutes - b.startMinutes);
+
+            sortedBookings.forEach((b) => {
+                const item = document.createElement('div');
+                item.className = 'booking-item';
+
+                const startH = Math.floor(b.startMinutes / 60);
+                const startM = b.startMinutes % 60;
+                const durationH = Math.floor(b.durationMinutes / 60);
+                const durationM = b.durationMinutes % 60;
+
+                let durationText = durationH > 0 ? `${durationH}시간` : '';
+                if(durationM > 0) durationText += ` ${durationM}분`;
+
+                const info = document.createElement('div');
+                info.className = 'booking-info';
+                info.innerHTML = `<strong>${String(startH).padStart(2, '0')}:${String(startM).padStart(2, '0')} (${durationText})</strong><br>[${b.dept}] ${b.name}<br><span style="color:var(--text-muted); font-size:10px; word-break:break-all;">사유: ${b.purpose}</span>`;
+                
+                const btnGroup = document.createElement('div');
+                btnGroup.className = 'action-btn-group';
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = '복사';
+                copyBtn.onclick = () => copyReservationInfo(b.dept, config.id, selectedDateStr, b.startMinutes, b.durationMinutes);
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'edit-btn';
+                editBtn.textContent = '수정';
+                editBtn.onclick = () => startEditBooking(config.id, selectedDateStr, b, b.pwd);
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'cancel-btn';
+                cancelBtn.textContent = '취소';
+                cancelBtn.onclick = () => deleteBooking(config.id, b.id, b.pwd);
+
+                btnGroup.appendChild(copyBtn);
+                btnGroup.appendChild(editBtn); 
+                btnGroup.appendChild(cancelBtn);
+
+                item.appendChild(info);
+                item.appendChild(btnGroup);
+                listContainer.appendChild(item);
             });
         });
     }
 
-    document.getElementById('prevMonthBtn').addEventListener('click', () => { currentCalDate.setMonth(currentCalDate.getMonth() - 1); renderCalendar(); });
-    document.getElementById('nextMonthBtn').addEventListener('click', () => { currentCalDate.setMonth(currentCalDate.getMonth() + 1); renderCalendar(); });
-    
-    function renderTimeline() {
-        const selectedDateStr = startDateInput.value; 
-        if (!selectedDateStr) return;
+    function resetForm() {
+        document.getElementById('booking-form').reset();
+        document.getElementById('repeat-count-group').style.display = 'none';
+        document.getElementById('booking-date').value = selectedDateStr;
+        
+        document.getElementById('start-hour').value = '08';
+        document.getElementById('start-minute').value = '00';
+        document.getElementById('end-hour').value = '08';
+        document.getElementById('end-minute').value = '30';
 
-        document.getElementById('timelineTitle').innerText = `[${selectedDateStr}] 24시간 예약 현황`;
+        editingReservation = null;
+        const submitBtn = document.getElementById('main-submit-btn');
+        submitBtn.textContent = '예약하기';
+        submitBtn.style.backgroundColor = 'var(--primary-color)';
+        
+        document.getElementById('cancel-edit-btn').style.display = 'none';
+    }
 
-        const overlays = {
-            '트레일블레이저(1165)': document.getElementById('overlay-car1'),
-            '1톤(6891)': document.getElementById('overlay-car2'),
-            '1톤(7539)': document.getElementById('overlay-car3'),
-            '3.5톤(6430)': document.getElementById('overlay-car4')
+    function startEditBooking(roomKey, dateStr, bookingInfo, savedPwd) {
+        if (savedPwd && savedPwd !== '') {
+            const inputPwd = prompt(`[${roomKey}] 예약을 수정합니다.\n예약 시 설정하신 비밀번호를 입력해주세요.`);
+            if (inputPwd === null) return;
+            if (inputPwd !== savedPwd) {
+                alert('비밀번호가 일치하지 않습니다.');
+                return;
+            }
+        }
+
+        editingReservation = { roomKey, dateStr, bookingId: bookingInfo.id };
+
+        switchRoom(roomKey);
+        selectedDateStr = dateStr;
+        document.getElementById('booking-date').value = dateStr;
+        
+        document.getElementById('dept-name').value = bookingInfo.dept;
+        document.getElementById('user-name').value = bookingInfo.name;
+        document.getElementById('purpose').value = bookingInfo.purpose;
+        document.getElementById('booking-pwd').value = bookingInfo.pwd;
+
+        const sH = Math.floor(bookingInfo.startMinutes / 60);
+        const sM = bookingInfo.startMinutes % 60;
+        const eH = Math.floor((bookingInfo.startMinutes + bookingInfo.durationMinutes) / 60);
+        const eM = (bookingInfo.startMinutes + bookingInfo.durationMinutes) % 60;
+
+        document.getElementById('start-hour').value = String(sH).padStart(2, '0');
+        document.getElementById('start-minute').value = String(sM).padStart(2, '0');
+        document.getElementById('end-hour').value = String(eH).padStart(2, '0');
+        document.getElementById('end-minute').value = String(eM).padStart(2, '0');
+
+        document.getElementById('repeat-type').value = 'none';
+        document.getElementById('repeat-count-group').style.display = 'none';
+
+        const submitBtn = document.getElementById('main-submit-btn');
+        submitBtn.textContent = '예약 수정하기';
+        submitBtn.style.backgroundColor = '#f59e0b'; 
+        
+        document.getElementById('cancel-edit-btn').style.display = 'block';
+
+        document.querySelector('.main-content').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function handleBook(event) {
+        event.preventDefault();
+        
+        selectedDateStr = document.getElementById('booking-date').value;
+
+        const dept = document.getElementById('dept-name').value.trim();
+        const name = document.getElementById('user-name').value.trim();
+        const pwd = document.getElementById('booking-pwd').value.trim(); 
+        const purpose = document.getElementById('purpose').value.trim();
+        
+        const startHour = parseInt(document.getElementById('start-hour').value);
+        const startMinute = parseInt(document.getElementById('start-minute').value);
+        
+        if (isNaN(startHour) || startHour < 8 || startHour > 19) {
+            alert('시작 시간(시)을 8에서 19 사이로 정확히 입력해주세요.');
+            return;
+        }
+        if (isNaN(startMinute) || startMinute < 0 || startMinute > 59) {
+            alert('시작 시간(분)을 0에서 59 사이로 정확히 입력해주세요.');
+            return;
+        }
+        const startMinutes = (startHour * 60) + startMinute;
+
+        const endHour = parseInt(document.getElementById('end-hour').value);
+        const endMinute = parseInt(document.getElementById('end-minute').value);
+        
+        if (isNaN(endHour) || endHour < 8 || endHour > 20) {
+            alert('종료 시간(시)을 8에서 20 사이로 정확히 입력해주세요.');
+            return;
+        }
+        if (isNaN(endMinute) || endMinute < 0 || endMinute > 59) {
+            alert('종료 시간(분)을 0에서 59 사이로 정확히 입력해주세요.');
+            return;
+        }
+        const endMinutes = (endHour * 60) + endMinute;
+
+        if (startMinutes < SYSTEM_START_TIME) {
+            alert('예약은 08:00 부터 가능합니다.');
+            return;
+        }
+
+        if (endMinutes <= startMinutes) {
+            alert('종료 시간은 시작 시간보다 이후여야 합니다.');
+            return;
+        }
+
+        const durationMinutes = endMinutes - startMinutes;
+
+        if (endMinutes > SYSTEM_END_TIME) {
+            alert('회의실 이용 가능 최종 시간(20:00)을 초과할 수 없습니다.');
+            return;
+        }
+
+        const repeatType = editingReservation ? 'none' : document.getElementById('repeat-type').value;
+        const repeatCount = repeatType !== 'none' ? parseInt(document.getElementById('repeat-count').value) : 1;
+
+        const targetDates = [];
+        let baseDate = new Date(selectedDateStr);
+
+        for (let i = 0; i < repeatCount; i++) {
+            const nextDate = new Date(baseDate);
+            if (repeatType === 'daily') {
+                nextDate.setDate(baseDate.getDate() + i);
+            } else if (repeatType === 'weekly') {
+                nextDate.setDate(baseDate.getDate() + (i * 7));
+            }
+            targetDates.push(formatDate(nextDate));
+        }
+
+        const conflictDates = [];
+        targetDates.forEach(dateStr => {
+            const dayBookings = getDayBookingsArray(currentRoom, dateStr);
+            const hasOverlap = dayBookings.some(b => {
+                if (editingReservation && currentRoom === editingReservation.roomKey && dateStr === editingReservation.dateStr && b.id === editingReservation.bookingId) {
+                    return false;
+                }
+                return (startMinutes < (b.startMinutes + b.durationMinutes)) && ((startMinutes + durationMinutes) > b.startMinutes);
+            });
+            if (hasOverlap) {
+                conflictDates.push(dateStr);
+            }
+        });
+
+        if (conflictDates.length > 0) {
+            alert(`선택하신 시간은 다른 부서의 예약과 중복됩니다.\n\n중복 날짜:\n${conflictDates.join('\n')}`);
+            return;
+        }
+
+        if (editingReservation) {
+            const newData = { dept, name, purpose, pwd, startMinutes, durationMinutes };
+            let updatePromise;
+
+            if (currentRoom === editingReservation.roomKey && selectedDateStr === editingReservation.dateStr) {
+                updatePromise = db.ref(`reservations/${currentRoom}/${selectedDateStr}/${editingReservation.bookingId}`).set(newData);
+            } else {
+                db.ref(`reservations/${editingReservation.roomKey}/${editingReservation.dateStr}/${editingReservation.bookingId}`).remove();
+                updatePromise = db.ref(`reservations/${currentRoom}/${selectedDateStr}`).push(newData);
+            }
+
+            updatePromise.then(() => {
+                resetForm();
+                alert('예약이 정상적으로 수정되었습니다.');
+                switchRoom(currentRoom); 
+            }).catch((err) => alert('예약 수정 실패: ' + err.message));
+
+        } else {
+            const promises = targetDates.map(dateStr => {
+                return db.ref(`reservations/${currentRoom}/${dateStr}`).push({ 
+                    dept, name, purpose, pwd, startMinutes, durationMinutes 
+                });
+            });
+
+            Promise.all(promises)
+                .then(() => {
+                    resetForm();
+                    switchRoom(currentRoom); 
+                    alert(repeatType !== 'none' ? `${repeatCount}회 정기 반복 예약이 완료되었습니다.` : '예약이 정상 등록되었습니다.');
+                })
+                .catch((err) => {
+                    alert('예약 저장 실패: ' + err.message);
+                });
+        }
+    }
+
+    function deleteBooking(roomKey, bookingId, savedPwd) {
+        if (!savedPwd || savedPwd === '') {
+            if (confirm(`선택하신 ${roomKey} 예약을 취소하시겠습니까?`)) {
+                db.ref(`reservations/${roomKey}/${selectedDateStr}/${bookingId}`).remove()
+                    .then(() => alert('예약이 정상적으로 취소되었습니다.'))
+                    .catch((err) => alert('취소 실패: ' + err.message));
+            }
+            return;
+        }
+
+        const inputPwd = prompt(`[${roomKey}] 예약을 취소합니다.\n예약 시 설정하신 비밀번호를 입력해주세요.`);
+        
+        if (inputPwd === null) return; 
+
+        if (inputPwd !== savedPwd) {
+            alert('비밀번호가 일치하지 않습니다.');
+            return;
+        }
+
+        db.ref(`reservations/${roomKey}/${selectedDateStr}/${bookingId}`).remove()
+            .then(() => alert('예약이 정상적으로 취소되었습니다.'))
+            .catch((err) => alert('취소 실패: ' + err.message));
+    }
+
+    function initSystem() {
+        document.getElementById('booking-date').value = selectedDateStr;
+
+        document.getElementById('booking-date').addEventListener('change', (e) => {
+            const newDate = new Date(e.target.value);
+            if (!isNaN(newDate.getTime())) {
+                selectedDateStr = e.target.value;
+                currentDate = newDate; 
+                renderCalendar();
+                updateDashboard();
+            }
+        });
+
+        document.getElementById('btn-room1').onclick = () => switchRoom('1층 회의실');
+        document.getElementById('btn-room2').onclick = () => switchRoom('2층 회의실');
+        document.getElementById('btn-room3').onclick = () => switchRoom('조립반 회의실');
+        
+        document.getElementById('btn-prev-month').onclick = () => changeMonth(-1);
+        document.getElementById('btn-next-month').onclick = () => changeMonth(1);
+        document.getElementById('booking-form').onsubmit = (e) => handleBook(e);
+        
+        document.getElementById('cancel-edit-btn').onclick = () => resetForm();
+
+        document.getElementById('repeat-type').onchange = (e) => {
+            const countGroup = document.getElementById('repeat-count-group');
+            countGroup.style.display = e.target.value === 'none' ? 'none' : 'block';
         };
-        Object.values(overlays).forEach(el => { if(el) el.innerHTML = ''; });
 
-        const dayStart = new Date(`${selectedDateStr}T00:00:00`);
-        const dayEnd = new Date(`${selectedDateStr}T23:59:59`);
-        const dayTotalMs = 24 * 60 * 60 * 1000;
-
-        allReservations.forEach(res => {
-            const resStart = new Date(res.startTime);
-            const resEnd = new Date(res.endTime);
-
-            if (resStart <= dayEnd && resEnd >= dayStart) {
-                const overlay = overlays[res.vehicle];
-                if (!overlay) return;
-
-                const visibleStart = Math.max(resStart.getTime(), dayStart.getTime());
-                const visibleEnd = Math.min(resEnd.getTime(), dayEnd.getTime());
-
-                const leftPercent = ((visibleStart - dayStart.getTime()) / dayTotalMs) * 100;
-                const widthPercent = ((visibleEnd - visibleStart) / dayTotalMs) * 100;
-
-                const block = document.createElement('div');
-                block.className = 'timeline-block';
-                block.style.left = `${leftPercent}%`;
-                block.style.width = `${widthPercent}%`;
-                block.innerText = res.userName; 
+        document.querySelectorAll('.duration-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const addMins = parseInt(e.target.getAttribute('data-add'));
                 
-                if (widthPercent < 2.5) { 
-                    block.style.fontSize = '8px';
-                    block.style.letterSpacing = '-1px';
-                    block.style.padding = '0';
-                } else if (widthPercent < 4.5) { 
-                    block.style.fontSize = '10px';
-                    block.style.letterSpacing = '-0.5px';
-                    block.style.padding = '0 1px';
-                } else if (widthPercent < 6) { 
-                    block.style.fontSize = '11px';
-                    block.style.padding = '0 2px';
-                } else {
-                    block.style.fontSize = '12px'; 
-                    block.style.padding = '0 4px';
+                const currentEndHour = parseInt(document.getElementById('end-hour').value) || 8;
+                const currentEndMinute = parseInt(document.getElementById('end-minute').value) || 0;
+                
+                let endTotalMins = (currentEndHour * 60) + currentEndMinute + addMins;
+                
+                if (endTotalMins > SYSTEM_END_TIME) {
+                    endTotalMins = SYSTEM_END_TIME;
+                    alert('종료 시간은 20:00를 초과할 수 없어 20:00로 자동 설정됩니다.');
                 }
                 
-                const [startD, startT] = res.startTime.split('T');
-                const [endD, endT] = res.endTime.split('T');
-                let displayTime = "";
+                const newEndHour = Math.floor(endTotalMins / 60);
+                const newEndMinute = endTotalMins % 60;
                 
-                const dDays = ['일', '월', '화', '수', '목', '금', '토'];
-                const sDateObj = new Date(startD);
-                const sDayName = dDays[sDateObj.getDay()];
-                const [sY, sM, sD] = startD.split('-');
-                
-                if (startD === endD) {
-                    displayTime = `${sY}/${sM}/${sD}(${sDayName}) ${startT} ~ ${endT}`;
-                } else {
-                    const eDateObj = new Date(endD);
-                    const eDayName = dDays[eDateObj.getDay()];
-                    const [eY, eM, eD] = endD.split('-');
-                    displayTime = `${sY}/${sM}/${sD}(${sDayName}) ${startT} ~ ${eY}/${eM}/${eD}(${eDayName}) ${endT}`;
-                }
+                document.getElementById('end-hour').value = String(newEndHour).padStart(2, '0');
+                document.getElementById('end-minute').value = String(newEndMinute).padStart(2, '0');
+            });
+        });
 
-                block.title = `[클릭하여 공지 복사 및 상세 확인]\n예약자: ${res.userName}\n차량: ${res.vehicle}\n기간: ${displayTime}`;
-
-                block.addEventListener('click', () => {
-                    selectedReservation = res;
-                    
-                    const copyText = `[차량 예약 공지]\n차량번호: ${res.vehicle}\n사용자: ${res.userName}\n사용일시: ${displayTime}\n목적지: ${res.destination}`;
-
-                    const textArea = document.createElement("textarea");
-                    textArea.value = copyText;
-                    textArea.style.position = "fixed";
-                    textArea.style.left = "-999999px";
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    textArea.setSelectionRange(0, 99999);
-                    
-                    let copySuccess = false;
-                    try {
-                        document.execCommand('copy');
-                        copySuccess = true;
-                    } catch (err) {
-                        console.error("복사 실패", err);
-                    }
-                    document.body.removeChild(textArea);
-
-                    const copyMsgHtml = copySuccess 
-                        ? `<div style="background:#d1e7dd; color:#0f5132; padding:10px; border-radius:4px; margin-bottom:15px; font-weight:bold; text-align:center; font-size:13px;">✅ 공지 내용이 클립보드에 자동으로 복사되었습니다.<br>(메신저에 Ctrl+V 로 붙여넣기 하세요)</div>`
-                        : `<div style="background:#f8d7da; color:#842029; padding:10px; border-radius:4px; margin-bottom:15px; font-weight:bold; text-align:center; font-size:13px;">⚠️ 자동 복사에 실패했습니다. 내용을 직접 드래그하여 복사해주세요.</div>`;
-
-                    const cHtml = `
-                        ${copyMsgHtml}
-                        <p><strong>차량번호:</strong> ${res.vehicle}</p>
-                        <p><strong>사용자:</strong> ${res.userName}</p>
-                        <p><strong>사용일시:</strong> ${displayTime}</p>
-                        <p><strong>목적지:</strong> ${res.destination}</p>
-                        <p><strong>목적:</strong> ${res.purpose}</p>
-                    `;
-                    
-                    document.getElementById('modalContent').innerHTML = cHtml;
-                    document.getElementById('resModal').style.display = 'flex';
-                });
-
-                overlay.appendChild(block);
+        dbRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                reservations = {
+                    '1층 회의실': data['1층 회의실'] || {},
+                    '2층 회의실': data['2층 회의실'] || {},
+                    '조립반 회의실': data['조립반 회의실'] || {}
+                };
+            } else {
+                reservations = { '1층 회의실': {}, '2층 회의실': {}, '조립반 회의실': {} };
             }
+            renderCalendar();
+            updateDashboard();
         });
     }
 
-    document.getElementById('btnModalClose').addEventListener('click', () => {
-        document.getElementById('resModal').style.display = 'none';
-        selectedReservation = null;
-    });
-
-    document.getElementById('btnModalEnd').addEventListener('click', async () => {
-        if (!selectedReservation) return;
-
-        const inputPw = prompt(`[${selectedReservation.userName}]님의 운행을 종료합니다.\n비밀번호 4자리(또는 마스터 비밀번호)를 입력해주세요.`);
-        if (inputPw === null || inputPw.trim() === "") return;
-
-        if (inputPw === selectedReservation.password || inputPw === "140916") {
-            if (confirm("운행을 현재 시간으로 종료하시겠습니까?")) {
-                try {
-                    const nowStr = getNowFormatted();
-                    await updateDoc(doc(db, "reservations", selectedReservation.id), {
-                        endTime: nowStr
-                    });
-                    alert("운행이 성공적으로 종료되었습니다.");
-                    document.getElementById('resModal').style.display = 'none';
-                    selectedReservation = null;
-                } catch (error) {
-                    alert("운행 종료 중 오류가 발생했습니다.");
-                }
-            }
-        } else {
-            alert("비밀번호가 일치하지 않습니다.");
-        }
-    });
-
-    document.getElementById('btnModalExtend').addEventListener('click', () => {
-        if (!selectedReservation) return;
-
-        const inputPw = prompt(`[${selectedReservation.userName}]님의 예약을 연장합니다.\n비밀번호 4자리(또는 마스터 비밀번호)를 입력해주세요.`);
-        if (inputPw === null || inputPw.trim() === "") return;
-
-        if (inputPw === selectedReservation.password || inputPw === "140916") {
-            const [endD, endT] = selectedReservation.endTime.split('T');
-            document.getElementById('extendEndDate').value = endD;
-            
-            const [eH, eM] = endT.split(':');
-            document.getElementById('extendEndHour').value = eH;
-            
-            let eM_val = eM;
-            if (!['00','10','20','30','40','50','59'].includes(eM)) eM_val = String(Math.floor(parseInt(eM)/10)*10).padStart(2, '0');
-            document.getElementById('extendEndMinute').value = eM_val;
-
-            document.getElementById('resModal').style.display = 'none';
-            document.getElementById('extendModal').style.display = 'flex';
-        } else {
-            alert("비밀번호가 일치하지 않습니다.");
-        }
-    });
-
-    document.getElementById('btnExtendCancel').addEventListener('click', () => {
-        document.getElementById('extendModal').style.display = 'none';
-        selectedReservation = null;
-    });
-
-    document.getElementById('btnExtendSubmit').addEventListener('click', async () => {
-        if (!selectedReservation) return;
-        
-        const d = document.getElementById('extendEndDate').value;
-        const h = document.getElementById('extendEndHour').value;
-        const m = document.getElementById('extendEndMinute').value;
-        
-        if (!d || !h || !m) {
-            alert("연장할 날짜와 시간을 선택해주세요.");
-            return;
-        }
-        
-        const newEndTime = `${d}T${h}:${m}`;
-        const newEndDateMs = new Date(newEndTime).getTime();
-        const existingStartMs = new Date(selectedReservation.startTime).getTime();
-
-        if (newEndDateMs <= existingStartMs) {
-            alert("연장 반납 일시가 시작 일시보다 빠를 수 없습니다.");
-            return;
-        }
-
-        let isOverlapping = false;
-        let overlapDetails = "";
-        for (let i = 0; i < allReservations.length; i++) {
-            const res = allReservations[i];
-            if (res.id === selectedReservation.id) continue;
-            
-            if (res.vehicle === selectedReservation.vehicle) {
-                const rStart = new Date(res.startTime).getTime();
-                const rEnd = new Date(res.endTime).getTime();
-                
-                if (existingStartMs < rEnd && newEndDateMs > rStart) {
-                    isOverlapping = true;
-                    overlapDetails = `[${res.userName}]님의 예약 (${res.startTime.replace('T', ' ')} ~ ${res.endTime.replace('T', ' ')})`;
-                    break;
-                }
-            }
-        }
-
-        if (isOverlapping) {
-            alert(`⚠️ 연장 실패: 연장하려는 시간에 다른 예약이 있습니다.\n충돌 예약: ${overlapDetails}`);
-            return;
-        }
-
-        try {
-            await updateDoc(doc(db, "reservations", selectedReservation.id), {
-                endTime: newEndTime
-            });
-            alert("운행 시간이 성공적으로 연장되었습니다.");
-            document.getElementById('extendModal').style.display = 'none';
-            selectedReservation = null;
-        } catch (error) {
-            alert("운행 연장 중 오류가 발생했습니다.");
-        }
-    });
-
-    document.getElementById('btnModalEdit').addEventListener('click', () => {
-        if (!selectedReservation) return;
-
-        const inputPw = prompt(`[${selectedReservation.userName}]님의 예약을 수정합니다.\n비밀번호 4자리(또는 마스터 비밀번호)를 입력해주세요.`);
-        if (inputPw === null || inputPw.trim() === "") return;
-
-        if (inputPw === selectedReservation.password || inputPw === "140916") {
-            document.getElementById('userName').value = selectedReservation.userName;
-            document.getElementById('password').value = selectedReservation.password;
-            document.getElementById('destination').value = selectedReservation.destination;
-            document.getElementById('purpose').value = selectedReservation.purpose;
-
-            const radios = document.getElementsByName('vehicle');
-            for (let i = 0; i < radios.length; i++) {
-                if (radios[i].value === selectedReservation.vehicle) {
-                    radios[i].checked = true;
-                    break;
-                }
-            }
-
-            const [startD, startT] = selectedReservation.startTime.split('T');
-            document.getElementById('startDate').value = startD;
-            
-            const [sH, sM] = startT.split(':');
-            startHourSelect.value = sH;
-            let sM_val = sM;
-            if (!['00','10','20','30','40','50','59'].includes(sM)) sM_val = String(Math.floor(parseInt(sM)/10)*10).padStart(2, '0');
-            startMinuteSelect.value = sM_val;
-
-            const [endD, endT] = selectedReservation.endTime.split('T');
-            document.getElementById('endDate').value = endD;
-            
-            const [eH, eM] = endT.split(':');
-            endHourSelect.value = eH;
-            let eM_val = eM;
-            if (!['00','10','20','30','40','50','59'].includes(eM)) eM_val = String(Math.floor(parseInt(eM)/10)*10).padStart(2, '0');
-            endMinuteSelect.value = eM_val;
-
-            previousStartTime = getCombinedStartString();
-
-            document.getElementById('resModal').style.display = 'none';
-            editingId = selectedReservation.id;
-            
-            const submitBtn = document.getElementById('mainSubmitBtn');
-            submitBtn.innerText = "🔄 예약 수정 완료하기";
-            submitBtn.style.backgroundColor = "var(--edit-color)";
-            submitBtn.style.color = "#000";
-            submitBtn.style.width = "70%";
-            
-            document.getElementById('btnCancelEdit').style.display = "block";
-            document.getElementById('reservationForm').scrollIntoView({ behavior: 'smooth' });
-        } else {
-            alert("비밀번호가 일치하지 않습니다.");
-        }
-    });
-
-    document.getElementById('btnModalCancel').addEventListener('click', async () => {
-        if (!selectedReservation) return;
-
-        const now = new Date();
-        const resStartTime = new Date(selectedReservation.startTime);
-
-        if (now >= resStartTime) {
-            const adminPw = prompt(`⚠️ 이미 운행 시간이 지나 일반 삭제가 제한됩니다.\n강제 삭제를 위해 [관리자 비밀번호]를 입력하세요.`);
-            if (adminPw === null || adminPw.trim() === "") return;
-
-            if (adminPw === "140916") {
-                if (confirm(`관리자 권한이 확인되었습니다.\n정말 예약을 강제 삭제하시겠습니까?`)) {
-                    try {
-                        await deleteDoc(doc(db, "reservations", selectedReservation.id));
-                        alert("관리자 권한으로 삭제되었습니다.");
-                        document.getElementById('resModal').style.display = 'none';
-                        selectedReservation = null;
-                    } catch (error) {
-                        alert("삭제 중 오류가 발생했습니다.");
-                    }
-                }
-            } else {
-                alert("관리자 비밀번호가 일치하지 않습니다.");
-            }
-        } else {
-            const inputPw = prompt(`[${selectedReservation.userName}]님의 예약을 취소합니다.\n비밀번호 4자리(또는 마스터 비밀번호)를 입력해주세요.`);
-            if (inputPw === null || inputPw.trim() === "") return;
-
-            if (inputPw === selectedReservation.password || inputPw === "140916") {
-                if (confirm(`비밀번호가 일치합니다.\n정말 예약을 취소하시겠습니까?`)) {
-                    try {
-                        await deleteDoc(doc(db, "reservations", selectedReservation.id));
-                        alert("예약이 정상적으로 취소되었습니다.");
-                        document.getElementById('resModal').style.display = 'none';
-                        selectedReservation = null;
-                    } catch (error) {
-                        alert("예약 취소 중 오류가 발생했습니다.");
-                    }
-                }
-            } else {
-                alert("비밀번호가 일치하지 않습니다.");
-            }
-        }
-    });
-
-    document.getElementById('btnCancelEdit').addEventListener('click', () => {
-        form.reset();
-        editingId = null;
-        
-        ['startHour', 'startMinute', 'endHour', 'endMinute'].forEach(id => {
-            document.getElementById(id).disabled = false;
-            document.getElementById(id).style.backgroundColor = '';
-        });
-
-        const submitBtn = document.getElementById('mainSubmitBtn');
-        submitBtn.innerText = "예약 등록하기";
-        submitBtn.style.backgroundColor = "var(--primary-color)";
-        submitBtn.style.color = "white";
-        submitBtn.style.width = "100%";
-        document.getElementById('btnCancelEdit').style.display = "none";
-        setDefaultTimes();
-    });
-    
-    endDateInput.addEventListener('input', hideError);
-    endHourSelect.addEventListener('change', hideError);
-    endMinuteSelect.addEventListener('change', hideError);
-    vehicleRadioGroup.addEventListener('change', hideError);
-
-    setDefaultTimes();
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault(); 
-        hideError(); 
-
-        const userName = document.getElementById('userName').value;
-        const password = document.getElementById('password').value;
-        const destination = document.getElementById('destination').value; 
-        const purpose = document.getElementById('purpose').value; 
-        const vehicle = document.querySelector('input[name="vehicle"]:checked').value;
-        
-        const combinedStartTimeForDB = getCombinedStartString();
-        const combinedEndTimeForDB = getCombinedEndString();
-        const newStartDate = new Date(combinedStartTimeForDB).getTime();
-        const newEndDate = new Date(combinedEndTimeForDB).getTime();
-
-        if(newStartDate >= newEndDate) {
-            showError("⚠️ 예약 실패: 반납 일시가 시작 일시보다 빠르거나 같을 수 없습니다.");
-            return;
-        }
-
-        let isOverlapping = false;
-        let overlapDetails = "";
-        
-        for (let i = 0; i < allReservations.length; i++) {
-            const res = allReservations[i];
-            if (editingId && res.id === editingId) continue;
-            
-            if (res.vehicle === vehicle) {
-                const existingStart = new Date(res.startTime).getTime();
-                const existingEnd = new Date(res.endTime).getTime();
-
-                if (newStartDate < existingEnd && newEndDate > existingStart) {
-                    isOverlapping = true;
-                    overlapDetails = `[${res.userName}]님의 예약 (${res.startTime.replace('T', ' ')} ~ ${res.endTime.replace('T', ' ')})`;
-                    break;
-                }
-            }
-        }
-
-        if (isOverlapping) {
-            showError(`⚠️ 중복 예약 불가: 해당 차량은 이미 예약되어 있습니다.\n충돌 예약: ${overlapDetails}`);
-            return; 
-        }
-
-        try {
-            if (editingId) {
-                await updateDoc(doc(db, "reservations", editingId), {
-                    userName: userName,
-                    password: password,
-                    destination: destination,
-                    purpose: purpose,
-                    vehicle: vehicle,
-                    startTime: combinedStartTimeForDB,
-                    endTime: combinedEndTimeForDB
-                });
-                alert("차량 예약이 성공적으로 수정되었습니다.");
-            } else {
-                await addDoc(collection(db, "reservations"), {
-                    userName: userName,
-                    password: password,
-                    destination: destination,
-                    purpose: purpose,
-                    vehicle: vehicle,
-                    startTime: combinedStartTimeForDB,
-                    endTime: combinedEndTimeForDB, 
-                    createdAt: new Date()
-                });
-                alert("차량 예약이 완료되었습니다.");
-            }
-            
-            form.reset(); 
-            allDayCheck.checked = false; 
-            ['startHour', 'startMinute', 'endHour', 'endMinute'].forEach(id => {
-                document.getElementById(id).disabled = false;
-                document.getElementById(id).style.backgroundColor = '';
-            });
-            
-            editingId = null;
-            const submitBtn = document.getElementById('mainSubmitBtn');
-            submitBtn.innerText = "예약 등록하기";
-            submitBtn.style.backgroundColor = "var(--primary-color)";
-            submitBtn.style.color = "white";
-            submitBtn.style.width = "100%";
-            document.getElementById('btnCancelEdit').style.display = "none";
-
-            setDefaultTimes(); 
-        } catch (error) {
-            console.error("Error adding document: ", error);
-            showError("⚠️ 시스템 오류: 데이터를 저장할 수 없습니다. Firebase 설정을 확인하세요.");
-        }
-    });
-
-    const downloadBtns = document.querySelectorAll('.dl-btn');
-    downloadBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const selectedCar = btn.getAttribute('data-car');
-            const targetMonth = downloadMonthInput.value; 
-            
-            if(!targetMonth) {
-                alert("다운로드할 월을 먼저 선택해주세요.");
-                return;
-            }
-
-            const filteredData = allReservations.filter(res => {
-                return res.vehicle === selectedCar && res.startTime.startsWith(targetMonth);
-            });
-
-            if(filteredData.length === 0) {
-                alert(`선택하신 ${targetMonth}월에는 [${selectedCar}] 운행 내역이 없습니다.`);
-                return;
-            }
-
-            let excelData = [
-                ["운행자(예약자)", "시작 일자", "시작 시간", "종료 일자", "종료 시간", "목적지", "사용 목적"]
-            ];
-
-            filteredData.forEach(res => {
-                const [sDate, sTime] = res.startTime.split('T');
-                const [eDate, eTime] = res.endTime.split('T');
-                excelData.push([res.userName, sDate, sTime, eDate, eTime, res.destination, res.purpose]);
-            });
-
-            const worksheet = XLSX.utils.aoa_to_sheet(excelData);
-
-            worksheet['!cols'] = [
-                { wch: 15 }, 
-                { wch: 12 }, 
-                { wch: 10 }, 
-                { wch: 12 }, 
-                { wch: 10 }, 
-                { wch: 25 }, 
-                { wch: 25 }  
-            ];
-
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "운행일지");
-
-            XLSX.writeFile(workbook, `운행일지_${selectedCar}_${targetMonth}.xlsx`);
-        });
-    });
-
-    const q = query(collection(db, "reservations"), orderBy("startTime", "asc"));
-    onSnapshot(q, (snapshot) => {
-        allReservations = []; 
-        snapshot.forEach((docSnap) => {
-            allReservations.push({ id: docSnap.id, ...docSnap.data() });
-        });
-        
-        renderCalendar();
-        renderTimeline(); 
-    });
+    initSystem();
 </script>
 
 </body>
