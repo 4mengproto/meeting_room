@@ -516,7 +516,7 @@
         .booking-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: center; /* 아이템 내 항목들을 세로 중앙에 정렬 */
             padding: 8px;
             border: 1px solid var(--border-color);
             border-radius: 5px;
@@ -597,9 +597,9 @@
 <div class="container">
     
     <div class="header-container">
-        <a href="https://4mengproto.github.io/Total-reserve/" class="home-btn">🏠 홈</a>
+        <a href="https://zihard86-creator.github.io/form-reserve-system/" class="home-btn">🏠 홈</a>
         <h1>포엠이엔지 회의실 예약</h1>
-        <a href="https://4mengproto.github.io/meeting_room/" class="vehicle-link-btn" target="_blank">법인차량 예약 바로가기</a>
+        <a href="https://zihard86-creator.github.io/reserve-car/" class="vehicle-link-btn" target="_blank">법인차량 예약 바로가기</a>
     </div>
 
     <div class="card" id="calendar-card">
@@ -771,6 +771,9 @@
 
     const SYSTEM_START_TIME = 8 * 60; 
     const SYSTEM_END_TIME = 20 * 60;   
+
+    // 💡 관리자 비밀번호
+    const ADMIN_PASSWORD = "140916";
 
     function formatDate(date) {
         const d = new Date(date);
@@ -976,7 +979,6 @@
         }
     }
 
-    // 💡 복사 버튼 클릭 시 요일이 포함된 형태로 복사되도록 수정
     function copyReservationInfo(dept, room, dateStr, startMins, durationMins) {
         const startH = Math.floor(startMins / 60);
         const startM = startMins % 60;
@@ -986,12 +988,10 @@
         
         const timeString = `${String(startH).padStart(2, '0')}:${String(startM).padStart(2, '0')} ~ ${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
         
-        // 요일 계산 로직 추가
         const dateObj = new Date(dateStr);
         const days = ['일', '월', '화', '수', '목', '금', '토'];
         const dayOfWeek = days[dateObj.getDay()];
         
-        // 공지 형태의 텍스트 구성 (요일 포함)
         const textToCopy = `[회의실 예약 공지]\n- 부서: ${dept}\n- 회의실: ${room}\n- 사용일자: ${dateStr} (${dayOfWeek})\n- 시간: ${timeString}`;
 
         navigator.clipboard.writeText(textToCopy).then(() => {
@@ -1084,46 +1084,64 @@
     }
 
     function startEditBooking(roomKey, dateStr, bookingInfo, savedPwd) {
+        // 💡 관리자 비밀번호 입력 시 권한 패스 로직 추가
+        let isAuthorized = false;
+
         if (savedPwd && savedPwd !== '') {
-            const inputPwd = prompt(`[${roomKey}] 예약을 수정합니다.\n예약 시 설정하신 비밀번호를 입력해주세요.`);
+            const inputPwd = prompt(`[${roomKey}] 예약을 수정합니다.\n비밀번호를 입력해주세요.`);
             if (inputPwd === null) return;
-            if (inputPwd !== savedPwd) {
+            if (inputPwd === ADMIN_PASSWORD || inputPwd === savedPwd) {
+                isAuthorized = true;
+                if (inputPwd === ADMIN_PASSWORD) alert('관리자 권한으로 수정합니다.');
+            } else {
+                alert('비밀번호가 일치하지 않습니다.');
+                return;
+            }
+        } else {
+            // 과거 데이터로 비밀번호가 없을 경우
+            const inputPwd = prompt(`[${roomKey}] 예약을 수정합니다.\n관리자 비밀번호를 입력해주세요.\n(기존 비밀번호가 없는 예약입니다.)`);
+            if (inputPwd === null) return;
+            if (inputPwd === ADMIN_PASSWORD) {
+                isAuthorized = true;
+            } else {
                 alert('비밀번호가 일치하지 않습니다.');
                 return;
             }
         }
 
-        editingReservation = { roomKey, dateStr, bookingId: bookingInfo.id };
+        if(isAuthorized) {
+            editingReservation = { roomKey, dateStr, bookingId: bookingInfo.id };
 
-        switchRoom(roomKey);
-        selectedDateStr = dateStr;
-        document.getElementById('booking-date').value = dateStr;
-        
-        document.getElementById('dept-name').value = bookingInfo.dept;
-        document.getElementById('user-name').value = bookingInfo.name;
-        document.getElementById('purpose').value = bookingInfo.purpose;
-        document.getElementById('booking-pwd').value = bookingInfo.pwd;
+            switchRoom(roomKey);
+            selectedDateStr = dateStr;
+            document.getElementById('booking-date').value = dateStr;
+            
+            document.getElementById('dept-name').value = bookingInfo.dept;
+            document.getElementById('user-name').value = bookingInfo.name;
+            document.getElementById('purpose').value = bookingInfo.purpose;
+            document.getElementById('booking-pwd').value = bookingInfo.pwd;
 
-        const sH = Math.floor(bookingInfo.startMinutes / 60);
-        const sM = bookingInfo.startMinutes % 60;
-        const eH = Math.floor((bookingInfo.startMinutes + bookingInfo.durationMinutes) / 60);
-        const eM = (bookingInfo.startMinutes + bookingInfo.durationMinutes) % 60;
+            const sH = Math.floor(bookingInfo.startMinutes / 60);
+            const sM = bookingInfo.startMinutes % 60;
+            const eH = Math.floor((bookingInfo.startMinutes + bookingInfo.durationMinutes) / 60);
+            const eM = (bookingInfo.startMinutes + bookingInfo.durationMinutes) % 60;
 
-        document.getElementById('start-hour').value = String(sH).padStart(2, '0');
-        document.getElementById('start-minute').value = String(sM).padStart(2, '0');
-        document.getElementById('end-hour').value = String(eH).padStart(2, '0');
-        document.getElementById('end-minute').value = String(eM).padStart(2, '0');
+            document.getElementById('start-hour').value = String(sH).padStart(2, '0');
+            document.getElementById('start-minute').value = String(sM).padStart(2, '0');
+            document.getElementById('end-hour').value = String(eH).padStart(2, '0');
+            document.getElementById('end-minute').value = String(eM).padStart(2, '0');
 
-        document.getElementById('repeat-type').value = 'none';
-        document.getElementById('repeat-count-group').style.display = 'none';
+            document.getElementById('repeat-type').value = 'none';
+            document.getElementById('repeat-count-group').style.display = 'none';
 
-        const submitBtn = document.getElementById('main-submit-btn');
-        submitBtn.textContent = '예약 수정하기';
-        submitBtn.style.backgroundColor = '#f59e0b'; 
-        
-        document.getElementById('cancel-edit-btn').style.display = 'block';
+            const submitBtn = document.getElementById('main-submit-btn');
+            submitBtn.textContent = '예약 수정하기';
+            submitBtn.style.backgroundColor = '#f59e0b'; 
+            
+            document.getElementById('cancel-edit-btn').style.display = 'block';
 
-        document.querySelector('.main-content').scrollIntoView({ behavior: 'smooth' });
+            document.querySelector('.main-content').scrollIntoView({ behavior: 'smooth' });
+        }
     }
 
     function handleBook(event) {
@@ -1251,27 +1269,33 @@
     }
 
     function deleteBooking(roomKey, bookingId, savedPwd) {
+        // 💡 관리자 비밀번호 입력 시 권한 패스 로직 추가
         if (!savedPwd || savedPwd === '') {
-            if (confirm(`선택하신 ${roomKey} 예약을 취소하시겠습니까?`)) {
+            const inputPwd = prompt(`[${roomKey}] 예약을 취소합니다.\n관리자 비밀번호를 입력해주세요.\n(기존 비밀번호가 없는 예약입니다.)`);
+            if (inputPwd === null) return;
+            
+            if (inputPwd === ADMIN_PASSWORD) {
                 db.ref(`reservations/${roomKey}/${selectedDateStr}/${bookingId}`).remove()
-                    .then(() => alert('예약이 정상적으로 취소되었습니다.'))
+                    .then(() => alert('관리자 권한으로 예약이 정상적으로 취소되었습니다.'))
                     .catch((err) => alert('취소 실패: ' + err.message));
+            } else {
+                alert('비밀번호가 일치하지 않습니다.');
             }
             return;
         }
 
-        const inputPwd = prompt(`[${roomKey}] 예약을 취소합니다.\n예약 시 설정하신 비밀번호를 입력해주세요.`);
+        const inputPwd = prompt(`[${roomKey}] 예약을 취소합니다.\n비밀번호를 입력해주세요.`);
         
         if (inputPwd === null) return; 
 
-        if (inputPwd !== savedPwd) {
+        if (inputPwd === ADMIN_PASSWORD || inputPwd === savedPwd) {
+            if (inputPwd === ADMIN_PASSWORD) alert('관리자 권한으로 취소합니다.');
+            db.ref(`reservations/${roomKey}/${selectedDateStr}/${bookingId}`).remove()
+                .then(() => alert('예약이 정상적으로 취소되었습니다.'))
+                .catch((err) => alert('취소 실패: ' + err.message));
+        } else {
             alert('비밀번호가 일치하지 않습니다.');
-            return;
         }
-
-        db.ref(`reservations/${roomKey}/${selectedDateStr}/${bookingId}`).remove()
-            .then(() => alert('예약이 정상적으로 취소되었습니다.'))
-            .catch((err) => alert('취소 실패: ' + err.message));
     }
 
     function initSystem() {
